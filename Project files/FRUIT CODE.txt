@@ -1,0 +1,9 @@
+/data/
+   /train/
+       /disease1/
+       /disease2/
+       /disease3/
+   /validation/
+       /disease1/
+       /disease2/
+       /disease3/

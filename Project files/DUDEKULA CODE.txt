@@ -1,0 +1,20 @@
+poultry_disease_classifier/
+│
+├── data/                          # Dataset directory
+│   ├── raw/                       # Original unprocessed images
+│   ├── processed/                 # Resized/augmented images
+│   ├── train/                     # Training dataset
+│   ├── val/                       # Validation dataset
+│   └── test/                      # Test dataset
+│
+├── notebooks/                    # Jupyter notebooks for EDA & prototyping
+│   └── 01_data_exploration.ipynb
+│   └── 02_model_training.ipynb
+│
+├── src/                          # Source code
+│   ├── __init__.py
+│   ├── data_loader.py            # Data preprocessing and augmentation
+│   ├── model.py                  # Transfer learning model architecture
+│   ├── train.py                  # Training loop and validation
+│   ├── evaluate.py               # Evaluation on test data
+│   └── utils.py                  # Utility f

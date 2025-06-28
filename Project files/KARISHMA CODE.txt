@@ -1,0 +1,73 @@
+import os
+import zipfile
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+# --- CONFIGURATION ---
+RAW_DIR = 'raw_data'
+DATA_DIR = 'data'
+IMG_SIZE = (224, 224)
+BATCH = 32
+
+# 1. Download & extract (example for Tanzania set)
+# (Manually download from Zenodo link and place zips in RAW_DIR)
+for zipf in os.listdir(RAW_DIR):
+    with zipfile.ZipFile(os.path.join(RAW_DIR, zipf), 'r') as z:
+        z.extractall(DATA_DIR)
+
+# 2. Organize into train/val directories
+# E.g., data/healthy/, cocci/, salmo/, ncd/
+
+# 3. Use ImageDataGenerator to load and augment images
+datagen = ImageDataGenerator(
+    rescale=1./255,
+    validation_split=0.2,
+    rotation_range=20,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    horizontal_flip=True
+)
+
+train_gen = datagen.flow_from_directory(
+    DATA_DIR,
+    target_size=IMG_SIZE,
+    batch_size=BATCH,
+    class_mode='categorical',
+    subset='training'
+)
+
+val_gen = datagen.flow_from_directory(
+    DATA_DIR,
+    target_size=IMG_SIZE,
+    batch_size=BATCH,
+    class_mode='categorical',
+    subset='validation'
+)
+
+# 4. Build transfer learning model (example: MobileNetV2)
+base = tf.keras.applications.MobileNetV2(
+    input_shape=IMG_SIZE + (3,),
+    include_top=False,
+    weights='imagenet'
+)
+base.trainable = False
+
+model = tf.keras.Sequential([
+    base,
+    tf.keras.layers.GlobalAveragePooling2D(),
+    tf.keras.layers.Dropout(0.3),
+    tf.keras.layers.Dense(train_gen.num_classes, activation='softmax')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# 5. Train
+history = model.fit(
+    train_gen,
+    validation_data=val_gen,
+    epochs=10
+)
